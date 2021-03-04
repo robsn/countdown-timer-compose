@@ -22,6 +22,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.androiddevchallenge.ui.numberpicker.NumberPicker
 
 @Composable
 fun Countdown() {
@@ -29,9 +30,27 @@ fun Countdown() {
     val countdownTimerViewModel: CountdownTimerViewModel = viewModel()
     val viewState by countdownTimerViewModel.state.collectAsState()
 
-    Column {
+    if (viewState.state == TimerState.Init) {
+        LandingCountdown(viewState, countdownTimerViewModel)
+    } else {
+        ActiveCountdown(viewState, countdownTimerViewModel)
+    }
+}
 
-        Text(text = viewState.currentTime.toString())
+@Composable
+private fun ActiveCountdown(
+    viewState: CountdownTimerViewState,
+    countdownTimerViewModel: CountdownTimerViewModel
+) {
+    Column {
+        Text(
+            text = "${
+            String.format(
+                "%02d",
+                viewState.timeLeftInMs / 1000 / 60
+            )
+            }:${String.format("%02d", viewState.timeLeftInMs / 1000 % 60)}"
+        )
 
         Button(onClick = countdownTimerViewModel::onPlayPause) {
             when (viewState.state) {
@@ -44,6 +63,23 @@ fun Countdown() {
 
         Button(enabled = true, onClick = countdownTimerViewModel::onStop) {
             Text("Reset")
+        }
+    }
+}
+
+@Composable
+private fun LandingCountdown(
+    viewState: CountdownTimerViewState,
+    countdownTimerViewModel: CountdownTimerViewModel
+) {
+    Column {
+        Text(text = "Seconds/lap")
+        NumberPicker(
+            number = viewState.timeLeftInMs,
+            onNumberChange = { countdownTimerViewModel.startTime(it) }
+        )
+        Button(onClick = countdownTimerViewModel::onPlayPause) {
+            Text("Start")
         }
     }
 }

@@ -59,7 +59,7 @@ class CountdownTimerViewModel : ViewModel() {
     private fun freshCountdownTimer() = object : CountDownTimer(startTimeInMillis, 1000) {
         override fun onTick(millisUntilFinished: Long) {
             timeLeftInMillis.value = millisUntilFinished
-            _state.value = CountdownTimerViewState(currentTime = timeLeftInMillis.value)
+            _state.value = CountdownTimerViewState(timeLeftInMs = timeLeftInMillis.value)
         }
 
         override fun onFinish() {
@@ -76,7 +76,7 @@ class CountdownTimerViewModel : ViewModel() {
             override fun onTick(millisUntilFinished: Long) {
                 timeLeftInMillis.value = millisUntilFinished
                 _state.value = CountdownTimerViewState(
-                    currentTime = timeLeftInMillis.value,
+                    timeLeftInMs = timeLeftInMillis.value,
                     state = TimerState.Running
                 )
             }
@@ -93,10 +93,14 @@ class CountdownTimerViewModel : ViewModel() {
         countDownTimer.cancel()
         _state.value = CountdownTimerViewState(timeLeftInMillis.value, TimerState.Paused)
     }
+
+    fun startTime(millis: Long) {
+        timeLeftInMillis.value = millis
+    }
 }
 
 data class CountdownTimerViewState(
-    val currentTime: Long = 0L,
+    val timeLeftInMs: Long = 30000L,
     val state: TimerState = TimerState.Init
 )
 
