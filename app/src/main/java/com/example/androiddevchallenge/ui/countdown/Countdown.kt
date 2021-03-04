@@ -52,6 +52,9 @@ private fun ActiveCountdown(
             }:${String.format("%02d", viewState.timeLeftInMs / 1000 % 60)}"
         )
 
+        Text(text = "Current Lap ${viewState.currentLap}")
+        Text(text = "Total Laps ${viewState.totalLaps}")
+
         Button(onClick = countdownTimerViewModel::onPlayPause) {
             when (viewState.state) {
                 TimerState.Init -> Text("Start")
@@ -77,6 +80,12 @@ private fun LandingCountdown(
         NumberPicker(
             number = (viewState.timeLeftInMs / 1000).toInt(),
             onNumberChange = { countdownTimerViewModel.startTime(it * 1000L) }
+        )
+
+        Text(text = "#laps")
+        NumberPicker(
+            number = viewState.totalLaps,
+            onNumberChange = { countdownTimerViewModel.totalLaps(it) }
         )
         Button(onClick = countdownTimerViewModel::onPlayPause) {
             Text("Start")

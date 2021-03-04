@@ -17,14 +17,21 @@ package com.example.androiddevchallenge.ui.countdown
 
 import android.os.CountDownTimer
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.launch
 
 class CountdownTimerViewModel : ViewModel() {
 
-    private val startTimeInMillis = 10000L
+    private var startTimeInMillis = 10000L
+    private var totalLaps = 3
 
-    private val timeLeftInMillis = MutableStateFlow(startTimeInMillis)
+    private val timeLeftInMillisFlow = MutableStateFlow(startTimeInMillis)
+    private val currentLapsFlow = MutableStateFlow(1)
+    private val timerStateFlow = MutableStateFlow(TimerState.Init)
 
     private val _state = MutableStateFlow(CountdownTimerViewState())
 
@@ -32,6 +39,19 @@ class CountdownTimerViewModel : ViewModel() {
         get() = _state
 
     private lateinit var countDownTimer: CountDownTimer
+
+    init {
+        viewModelScope.launch {
+            combine(
+                timeLeftInMillisFlow,
+                timerStateFlow,
+                currentLapsFlow
+            ) { millis, timerState, laps ->
+                CountdownTimerViewState(millis, timerState, laps, totalLaps)
+            }.collect { _state.value = it }
+        }
+    }
+
 
     fun onPlayPause() {
         when (state.value.state) {
@@ -51,15 +71,15 @@ class CountdownTimerViewModel : ViewModel() {
 
     private fun reset() {
         countDownTimer.cancel()
-        timeLeftInMillis.value = startTimeInMillis
+        timeLeftInMillisFlow.value = startTimeInMillis
         countDownTimer = freshCountdownTimer()
-        _state.value = CountdownTimerViewState(startTimeInMillis, TimerState.Init)
+        timerStateFlow.value = TimerState.Init
+        currentLapsFlow.value = 1
     }
 
     private fun freshCountdownTimer() = object : CountDownTimer(startTimeInMillis, 1000) {
         override fun onTick(millisUntilFinished: Long) {
-            timeLeftInMillis.value = millisUntilFinished
-            _state.value = CountdownTimerViewState(timeLeftInMs = timeLeftInMillis.value)
+            timeLeftInMillisFlow.value = millisUntilFinished
         }
 
         override fun onFinish() {
@@ -68,17 +88,19 @@ class CountdownTimerViewModel : ViewModel() {
     }
 
     private fun confetti() {
-        _state.value = CountdownTimerViewState(0L, TimerState.Finished)
+        if (currentLapsFlow.value < state.value.totalLaps) {
+            currentLapsFlow.value = currentLapsFlow.value.inc()
+            countDownTimer = freshCountdownTimer().start()
+        } else {
+            timerStateFlow.value = TimerState.Finished
+        }
     }
 
     private fun startTimer() {
-        countDownTimer = object : CountDownTimer(timeLeftInMillis.value, 1000) {
+        timerStateFlow.value = TimerState.Running
+        countDownTimer = object : CountDownTimer(timeLeftInMillisFlow.value, 1000) {
             override fun onTick(millisUntilFinished: Long) {
-                timeLeftInMillis.value = millisUntilFinished
-                _state.value = CountdownTimerViewState(
-                    timeLeftInMs = timeLeftInMillis.value,
-                    state = TimerState.Running
-                )
+                timeLeftInMillisFlow.value = millisUntilFinished
             }
 
             override fun onFinish() {
@@ -86,22 +108,28 @@ class CountdownTimerViewModel : ViewModel() {
             }
         }
         countDownTimer.start()
-        _state.value = CountdownTimerViewState(timeLeftInMillis.value, TimerState.Running)
     }
 
     private fun pauseTimer() {
         countDownTimer.cancel()
-        _state.value = CountdownTimerViewState(timeLeftInMillis.value, TimerState.Paused)
+        timerStateFlow.value = TimerState.Paused
+    }
+
+    fun totalLaps(laps: Int) {
+        totalLaps = laps
     }
 
     fun startTime(millis: Long) {
-        timeLeftInMillis.value = millis
+        startTimeInMillis = millis
+        timeLeftInMillisFlow.value = millis
     }
 }
 
 data class CountdownTimerViewState(
     val timeLeftInMs: Long = 30000L,
-    val state: TimerState = TimerState.Init
+    val state: TimerState = TimerState.Init,
+    val currentLap: Int = 1,
+    val totalLaps: Int = 3,
 )
 
 enum class TimerState {
