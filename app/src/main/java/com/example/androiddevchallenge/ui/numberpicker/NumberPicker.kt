@@ -23,18 +23,18 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 
 @Composable
-fun NumberPicker(number: Long, onNumberChange: (Long) -> Unit) {
+fun NumberPicker(number: Int, onNumberChange: (Int) -> Unit) {
     Row {
         val (count, setCount) = remember { mutableStateOf(number) }
 
-        Button(onClick = { setCount(count.minus(1000)) }) {
+        Button(onClick = { setCount(count.dec()) }) {
             Text(text = "-")
             onNumberChange(count)
         }
 
-        Text(text = "${count / 1000}")
+        Text(text = "$count")
 
-        Button(onClick = { setCount(count.plus(1000)) }) {
+        Button(onClick = { setCount(count.inc()) }) {
             Text(text = "+")
             onNumberChange(count)
         }

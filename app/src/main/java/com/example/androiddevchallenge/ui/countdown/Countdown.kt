@@ -45,10 +45,10 @@ private fun ActiveCountdown(
     Column {
         Text(
             text = "${
-            String.format(
-                "%02d",
-                viewState.timeLeftInMs / 1000 / 60
-            )
+                String.format(
+                    "%02d",
+                    viewState.timeLeftInMs / 1000 / 60
+                )
             }:${String.format("%02d", viewState.timeLeftInMs / 1000 % 60)}"
         )
 
@@ -75,8 +75,8 @@ private fun LandingCountdown(
     Column {
         Text(text = "Seconds/lap")
         NumberPicker(
-            number = viewState.timeLeftInMs,
-            onNumberChange = { countdownTimerViewModel.startTime(it) }
+            number = (viewState.timeLeftInMs / 1000).toInt(),
+            onNumberChange = { countdownTimerViewModel.startTime(it * 1000L) }
         )
         Button(onClick = countdownTimerViewModel::onPlayPause) {
             Text("Start")
