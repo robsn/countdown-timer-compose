@@ -15,27 +15,57 @@
  */
 package com.example.androiddevchallenge.ui.numberpicker
 
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
-import androidx.compose.material.Button
+import androidx.compose.foundation.layout.padding
+import androidx.compose.material.Icon
+import androidx.compose.material.IconButton
+import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Remove
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.dp
 
 @Composable
-fun NumberPicker(number: Int, onNumberChange: (Int) -> Unit) {
-    Row {
+fun NumberPicker(modifier: Modifier, number: Int, onNumberChange: (Int) -> Unit) {
+    Row(
+        modifier = modifier,
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.SpaceEvenly
+    ) {
+
         val (count, setCount) = remember { mutableStateOf(number) }
 
-        Button(onClick = { setCount(count.dec()) }) {
-            Text(text = "-")
+        IconButton(onClick = { setCount(count.dec()) }) {
+            Icon(
+                imageVector = Icons.Filled.Remove,
+                contentDescription = "decrement"
+            )
             onNumberChange(count)
         }
 
-        Text(text = "$count")
+        Text(
+            text = "$count",
+            style = MaterialTheme.typography.h2,
+            textAlign = TextAlign.End,
+            modifier = Modifier.padding(
+                horizontal = 8.dp,
+                vertical = 8.dp
+            )
+        )
 
-        Button(onClick = { setCount(count.inc()) }) {
-            Text(text = "+")
+        IconButton(onClick = { setCount(count.inc()) }) {
+            Icon(
+                imageVector = Icons.Filled.Add,
+                contentDescription = "increment"
+            )
             onNumberChange(count)
         }
     }

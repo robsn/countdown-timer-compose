@@ -56,7 +56,6 @@ fun MyApp() {
     }
 }
 
-
 @Composable
 private fun AppBar() {
     Row(
@@ -73,7 +72,6 @@ private fun AppBar() {
         )
     }
 }
-
 
 @Preview("Light Theme", widthDp = 360, heightDp = 640)
 @Composable

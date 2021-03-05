@@ -52,7 +52,6 @@ class CountdownTimerViewModel : ViewModel() {
         }
     }
 
-
     fun onPlayPause() {
         when (state.value.state) {
             TimerState.Init -> startTimer()
